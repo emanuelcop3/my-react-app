@@ -1,5 +1,5 @@
 
-name: React CI
+name: React CI/CD
 
 on:
   push:
@@ -81,9 +81,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Construir Docker Image
-        run: docker build -t my-react-app .
-      - name: Rodar Docker Container
-        run: docker run -d -p 80:80 my-react-app
-      - name: Checar se o container está rodando
-        run: docker ps | grep my-react-app
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/my-react-app:test-${{ github.run_id }}
+      - name: Logout from Docker Hub
+        run: docker logout
