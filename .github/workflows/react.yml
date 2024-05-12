@@ -1,0 +1,35 @@
+
+name: React CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  build-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Instalar dependências
+        run: npm install
+      - name: Construir a aplicação React
+        run: npm run build
+
+  docker-deployment:
+    needs: build-app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir Docker Image
+        run: docker build -t my-react-app .
+      - name: Rodar Docker Container
+        run: docker run -d -p 80:80 my-react-app
+      - name: Checar se o container está rodando
+        run: docker ps | grep my-react-app
