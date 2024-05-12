@@ -62,8 +62,22 @@ jobs:
           name: sonarqube-analysis-report
           path: sonarqube-analysis-report.json
 
-  docker-deployment:
+  unit-tests:
     needs: static-code-analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Instalar dependências
+        run: npm install
+      - name: Rodar testes unitários com Jest
+        run: npm test
+
+  docker-deployment:
+    needs: unit-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
