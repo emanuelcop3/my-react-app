@@ -1,0 +1,61 @@
+
+name: Deploy Docker Image to AWS ECS
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker image tag to deploy'
+        required: true
+        default: 'latest'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Pull Docker image from Docker Hub
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/my-react-app:latest
+      
+      - name: Generate SSH key
+        run: |
+          ssh-keygen -t rsa -b 4096 -m PEM -f deploy_key -N ""
+          echo "${{ secrets.SSH_KEY_PASSWORD }}" | ssh-keygen -p -P "" -N "$SSH_KEY_PASSWORD" -f deploy_key
+          ssh-add deploy_key
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+        id: terraform
+
+      - name: Extract public IP
+        run: echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+        working-directory: ./terraform
+
+      - name: Deploy to EC2
+        run: |
+          scp -o StrictHostKeyChecking=no -i deploy_key public_ip.pem ubuntu@${{ env.EC2_IP }}:/home/ubuntu/
+          ssh -o StrictHostKeyChecking=no -i deploy_key ubuntu@${{ env.EC2_IP }} "docker pull ${{ secrets.DOCKER_USERNAME }}/my-react-app:latest && docker stop myapp || true && docker rm myapp || true and docker run -d --name myapp -p 80:3000 ${{ secrets.DOCKER_USERNAME }}/my-react-app:latest"
+
+      - name: Print EC2 IP Address
+        run: echo "The public IP address of the EC2 instance is: ${{ env.EC2_IP }}"
