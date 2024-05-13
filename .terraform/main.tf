@@ -3,6 +3,16 @@ provider "aws" {
   region = "us-east-1"
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "josercf-state-bucket" 
+    key            = "terraform.tfstate"
+    region         = "us-east-1"                  
+    encrypt        = true
+  }
+}
+
+
 resource "aws_security_group" "allow_web" {
   name        = "allow_web_traffic"
   description = "Allow web inbound traffic"
