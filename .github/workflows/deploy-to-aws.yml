@@ -21,10 +21,12 @@ jobs:
       - name: Pull Docker image from Docker Hub
         run: docker pull ${{ secrets.DOCKER_USERNAME }}/my-react-app:latest
       
-      - name: Generate SSH key
+      - name: Generate SSH key and add to agent
         run: |
           ssh-keygen -t rsa -b 4096 -m PEM -f deploy_key -N ""
-          echo "${{ secrets.SSH_KEY_PASSWORD }}" | ssh-keygen -p -P "" -N "$SSH_KEY_PASSWORD" -f deploy_key
+          # Start ssh-agent
+          eval "$(ssh-agent -s)"
+          # Add the SSH key to the agent
           ssh-add deploy_key
 
       - name: Setup Terraform
