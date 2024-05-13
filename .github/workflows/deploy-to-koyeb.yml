@@ -1,5 +1,5 @@
 
-name: Manual Deploy to Koyeb
+name: Deployment
 
 on:
   workflow_dispatch:
