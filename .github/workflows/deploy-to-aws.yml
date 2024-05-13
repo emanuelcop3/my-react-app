@@ -1,5 +1,5 @@
 
-name: Deploy Docker Image to AWS ECS
+name: Deployment
 
 on:
   workflow_dispatch:
@@ -59,4 +59,3 @@ jobs:
 
       - name: Print EC2 IP Address
         run: echo "The public IP address of the EC2 instance is: ${{ env.EC2_IP }}"
-        
