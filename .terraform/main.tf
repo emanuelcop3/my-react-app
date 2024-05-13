@@ -35,7 +35,6 @@ resource "aws_instance" "web" {
   ami                    = "ami-03d5c68bab01f3496"
   instance_type          = "t2.micro"
   security_groups        = [aws_security_group.allow_web.name]
-  key_name               = aws_key_pair.deployer.key_name
 
   user_data = <<-EOF
                 #!/bin/bash
