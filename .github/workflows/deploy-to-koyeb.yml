@@ -20,6 +20,14 @@ jobs:
         run: |
           curl -fsSL https://raw.githubusercontent.com/koyeb/koyeb-cli/master/install.sh | sh
           echo "PATH=$HOME/.koyeb/bin:$PATH" >> $GITHUB_ENV
+      - name: Add configuration to Koyeb config file
+        run: |
+          cat << EOF >> $HOME/.koyeb.yaml
+          api_url: https://api.koyeb.com
+          token: ${{ secrets.KOYEB_TOKEN }}
+          organization: ""
+          debug: false
+          EOF
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -27,8 +35,6 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Pull Docker image from Docker Hub
         run: docker pull ${{ secrets.DOCKER_USERNAME }}/my-react-app:${{ github.event.inputs.tag }}
-      - name: Log in to Koyeb via CLI
-        run: koyeb login --token ${{ secrets.KOYEB_TOKEN }}
       - name: Deploy to Koyeb
         run: koyeb app deploy ${{ secrets.KOYEB_APP_NAME }} --docker ${{ secrets.DOCKER_USERNAME }}/my-react-app:${{ github.event.inputs.tag }}
       - name: Get deployment status
