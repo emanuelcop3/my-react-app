@@ -36,7 +36,7 @@ jobs:
       - name: Pull Docker image from Docker Hub
         run: docker pull ${{ secrets.DOCKER_USERNAME }}/my-react-app:${{ github.event.inputs.tag }}
       - name: Deploy to Koyeb
-        run: koyeb app deploy ${{ secrets.KOYEB_APP_NAME }} --docker ${{ secrets.DOCKER_USERNAME }}/my-react-app:${{ github.event.inputs.tag }}
+        run: koyeb app deploy ${{ secrets.KOYEB_APP_NAME }} --image ${{ secrets.DOCKER_USERNAME }}/my-react-app:latest
       - name: Get deployment status
         run: koyeb app get ${{ secrets.KOYEB_APP_NAME }} --output json | jq '.services[0].routes[0].uri'
         env:
