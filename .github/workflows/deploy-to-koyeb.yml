@@ -19,7 +19,10 @@ jobs:
       - name: Install Koyeb CLI
         run: |
           curl -s https://cli.koyeb.com/install.sh | sh
+          echo "Koyeb CLI installed in $(dirname $(which koyeb))"
           echo "PATH=$HOME/.koyeb/bin:$PATH" >> $GITHUB_ENV
+      - name: Check Koyeb CLI Installation
+        run: koyeb --version
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
