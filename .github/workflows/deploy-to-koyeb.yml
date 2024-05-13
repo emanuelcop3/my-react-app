@@ -20,8 +20,6 @@ jobs:
         run: |
           curl -fsSL https://raw.githubusercontent.com/koyeb/koyeb-cli/master/install.sh | sh
           echo "PATH=$HOME/.koyeb/bin:$PATH" >> $GITHUB_ENV
-      - name: Check Koyeb CLI Installation
-        run: koyeb --version
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
