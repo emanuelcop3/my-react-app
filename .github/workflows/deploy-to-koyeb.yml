@@ -10,6 +10,15 @@ on:
         default: 'latest'
 
 jobs:
+
+  setup-koyeb-cli:
+    needs: setup-koyeb-cli
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Koyeb CLI
+        run: |
+          curl -s https://cli.koyeb.com/install.sh | sh
+
   deploy-to-koyeb:
     runs-on: ubuntu-latest
     steps:
