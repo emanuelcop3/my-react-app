@@ -3,62 +3,33 @@ provider "aws" {
   region = "us-east-1"
 }
 
-terraform {
-  backend "s3" {
-    bucket         = "josercf-state-bucket" 
-    key            = "terraform.tfstate"
-    region         = "us-east-1"                  
-    encrypt        = true
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = "josercf-state-bucket-tf"  # O nome deve ser globalmente único
+  acl    = "private"  # Define o bucket como privado
+
+  versioning {
+    enabled = true  # Opcional: habilita versionamento
   }
 }
 
 
-resource "aws_security_group" "allow_web" {
-  name        = "allow_web_traffic"
-  description = "Allow web inbound traffic"
+resource "aws_s3_bucket_policy" "my_bucket_policy" {
+  bucket = aws_s3_bucket.my_bucket.id
 
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = [
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:PutObject"
+        ]
+        Effect    = "Allow"
+        Resource  = "${aws_s3_bucket.my_bucket.arn}/*"
+        Principal = "*"  # Ajuste conforme a necessidade para especificar usuários ou roles
+      }
+    ]
+  })
 }
 
-resource "aws_instance" "web" {
-  ami                    = "ami-057f57c2fcd14e5f4"
-  instance_type          = "t2.micro"
-  security_groups        = [aws_security_group.allow_web.name]
-
-  user_data = <<-EOF
-                #!/bin/bash
-                sudo apt update
-                sudo apt install -y docker.io
-                sudo systemctl start docker
-                sudo systemctl enable docker
-              EOF
-
-  tags = {
-    Name = "WebServer"
-  }
-}
-
-output "public_ip" {
-  value = aws_instance.web.public_ip
-}
