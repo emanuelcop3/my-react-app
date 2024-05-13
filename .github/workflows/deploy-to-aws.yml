@@ -52,7 +52,7 @@ jobs:
 
       - name: Extract public IP
         run: echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
-        working-directory: ./terraform
+        working-directory: .terraform
 
       - name: Deploy to EC2
         run: |
