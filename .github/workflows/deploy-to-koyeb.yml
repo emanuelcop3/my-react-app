@@ -18,8 +18,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Install Koyeb CLI
         run: |
-          curl -s https://packages.koyeb.com/install.sh | bash
-          echo "Koyeb CLI installed in $(dirname $(which koyeb))"
+          curl -fsSL https://raw.githubusercontent.com/koyeb/koyeb-cli/master/install.sh | sh
           echo "PATH=$HOME/.koyeb/bin:$PATH" >> $GITHUB_ENV
       - name: Check Koyeb CLI Installation
         run: koyeb --version
