@@ -19,7 +19,7 @@ jobs:
         run: |
           curl -s https://cli.koyeb.com/install.sh | sh
       - id: set-env
-        run: echo "koyeb-path=$(dirname $(which koyeb))" >> $GITHUB_ENV
+        run: echo "::set-output name=koyeb-path::$(dirname $(which koyeb))"
 
   deploy-to-koyeb:
     needs: setup-koyeb-cli
@@ -28,7 +28,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Set PATH
-        run: echo "$PATH:${{ needs.setup-koyeb-cli.outputs.koyeb-path }}" >> $GITHUB_ENV
+        run: echo "PATH=${{ github.action_path }}:${{ needs.setup-koyeb-cli.outputs.koyeb-path }}:$PATH" >> $GITHUB_ENV
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
