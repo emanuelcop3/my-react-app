@@ -3,11 +3,6 @@ name: Deployment
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Docker image tag to deploy'
-        required: true
-        default: 'latest'
 
 jobs:
   deploy:
