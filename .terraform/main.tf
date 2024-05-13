@@ -1,6 +1,6 @@
 
 provider "aws" {
-  region = "us-east-2"
+  region = "us-east-1"
 }
 
 resource "aws_security_group" "allow_web" {
@@ -32,7 +32,7 @@ resource "aws_security_group" "allow_web" {
 }
 
 resource "aws_instance" "web" {
-  ami                    = "ami-03d5c68bab01f3496"
+  ami                    = "ami-057f57c2fcd14e5f4"
   instance_type          = "t2.micro"
   security_groups        = [aws_security_group.allow_web.name]
 
