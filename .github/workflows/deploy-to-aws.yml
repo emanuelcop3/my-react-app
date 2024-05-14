@@ -18,8 +18,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Pull Docker image from Docker Hub
-        run: docker pull ${{ secrets.DOCKER_USERNAME }}/my-react-app:latest
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/yourappname:latest
       
       - name: Generate SSH key and add to agent
         run: |
@@ -28,6 +33,7 @@ jobs:
           eval "$(ssh-agent -s)"
           # Add the SSH key to the agent
           ssh-add deploy_key
+          chmod 600 deploy_key
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -47,9 +53,13 @@ jobs:
 
       - name: Extract public IP
         run: echo "EC2_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
-        working-directory: ./terraform
+        working-directory: .terraform
 
-      - name: Deploy to EC2
+      - name: Add ssh key to EC2
         run: |
           scp -o StrictHostKeyChecking=no -i deploy_key public_ip.pem ubuntu@${{ env.EC2_IP }}:/home/ubuntu/
-          ssh -o StrictHostKeyChecking=no -i deploy_key ubuntu@${{ env.EC2_IP }} "docker pull ${{ secrets.DOCKER_USERNAME }}/my-react-app:latest && docker stop myapp || true && docker rm myapp || true and docker run -d --name myapp -p 80:3000 ${{ secrets.DOCKER_USERNAME }}/my-react-app:latest"
+          
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i deploy_key ubuntu@${{ env.EC2_IP }} "docker pull ***/my-react-app:latest && docker stop myapp || true && docker rm myapp || true && docker run -d --name myapp -p 80:3000 ***/my-react-app:latest"
+         
